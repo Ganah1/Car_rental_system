@@ -1,0 +1,71 @@
+<%- include('partials/header', { title: car.name }) %>
+
+<div class="container my-4">
+  <a href="/" class="btn btn-outline-secondary btn-sm mb-3">
+    <i class="bi bi-arrow-left"></i> Back to cars
+  </a>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm">
+        <img src="<%= car.image %>" class="card-img-top" alt="<%= car.name %>"
+             style="max-height:420px;object-fit:cover;"
+             onerror="this.src='https://via.placeholder.com/800x420?text=Car'">
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <h2 class="mb-1"><%= car.name %></h2>
+            <% if (car.available) { %>
+              <span class="badge bg-success">Available</span>
+            <% } else { %>
+              <span class="badge bg-danger">Unavailable</span>
+            <% } %>
+          </div>
+          <p class="text-muted"><%= car.model %> • <%= car.year %></p>
+          <h3 class="text-primary mb-3">$<%= Number(car.price_per_day).toFixed(2) %> <small class="fs-6 text-muted">/day</small></h3>
+
+          <p><%= car.description %></p>
+
+          <ul class="list-unstyled mb-3">
+            <li><i class="bi bi-people-fill text-primary"></i> <strong>Seats:</strong> <%= car.seats %></li>
+            <li><i class="bi bi-gear-fill text-primary"></i> <strong>Transmission:</strong> <%= car.transmission %></li>
+            <li><i class="bi bi-fuel-pump-fill text-primary"></i> <strong>Fuel:</strong> <%= car.fuel %></li>
+          </ul>
+
+          <hr>
+
+          <% if (car.available) { %>
+            <% if (user) { %>
+              <h5 class="mb-3">Book this car</h5>
+              <form action="/book/<%= car.id %>" method="POST">
+                <div class="mb-2">
+                  <label class="form-label small">Start Date</label>
+                  <input type="date" name="start_date" class="form-control" required min="<%= new Date().toISOString().split('T')[0] %>">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small">End Date</label>
+                  <input type="date" name="end_date" class="form-control" required min="<%= new Date().toISOString().split('T')[0] %>">
+                </div>
+                <button class="btn btn-primary w-100">
+                  <i class="bi bi-calendar-check"></i> Book Now
+                </button>
+              </form>
+            <% } else { %>
+              <div class="alert alert-info mb-0">
+                <a href="/login">Log in</a> to book this car.
+              </div>
+            <% } %>
+          <% } else { %>
+            <div class="alert alert-warning mb-0">This car is currently unavailable.</div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

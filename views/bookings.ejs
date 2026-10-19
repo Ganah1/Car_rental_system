@@ -1,0 +1,64 @@
+<%- include('partials/header', { title: 'My Bookings' }) %>
+
+<div class="container my-4">
+  <h2 class="mb-4">My Bookings</h2>
+
+  <% if (bookings.length === 0) { %>
+    <div class="alert alert-info">
+      You have no bookings yet. <a href="/">Browse cars</a>
+    </div>
+  <% } else { %>
+    <div class="row g-3">
+      <% bookings.forEach(b => { %>
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="row g-0">
+              <div class="col-4">
+                <img src="<%= b.car_image %>" class="img-fluid rounded-start h-100"
+                     style="object-fit:cover;min-height:150px;"
+                     onerror="this.src='https://via.placeholder.com/200x150?text=Car'">
+              </div>
+              <div class="col-8">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between">
+                    <h5 class="card-title mb-1"><%= b.car_name %></h5>
+                    <%
+                      const colors = {
+                        pending: 'warning text-dark',
+                        confirmed: 'success',
+                        rejected: 'danger',
+                        cancelled: 'secondary',
+                        completed: 'info text-dark'
+                      };
+                    %>
+                    <span class="badge bg-<%= colors[b.status] || 'secondary' %> text-capitalize">
+                      <%= b.status %>
+                    </span>
+                  </div>
+                  <p class="text-muted small mb-2"><%= b.car_model %></p>
+                  <p class="small mb-1">
+                    <i class="bi bi-calendar"></i>
+                    <%= new Date(b.start_date).toLocaleDateString() %> →
+                    <%= new Date(b.end_date).toLocaleDateString() %>
+                  </p>
+                  <p class="mb-2"><strong class="text-primary">$<%= Number(b.total_price).toFixed(2) %></strong></p>
+
+                  <% if (['pending', 'confirmed'].includes(b.status)) { %>
+                    <form action="/bookings/<%= b.id %>/cancel" method="POST"
+                          onsubmit="return confirm('Cancel this booking?');">
+                      <button class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-x-circle"></i> Cancel
+                      </button>
+                    </form>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

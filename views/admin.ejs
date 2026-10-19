@@ -1,0 +1,244 @@
+<%- include('partials/header', { title: 'Admin Dashboard' }) %>
+
+<div class="container my-4">
+  <h2 class="mb-4"><i class="bi bi-speedometer2"></i> Admin Dashboard</h2>
+
+  <!-- Stats -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm text-center">
+        <div class="card-body">
+          <h3 class="mb-0 text-primary"><%= stats.totalCars %></h3>
+          <small class="text-muted">Total Cars</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm text-center">
+        <div class="card-body">
+          <h3 class="mb-0 text-success"><%= stats.availableCars %></h3>
+          <small class="text-muted">Available</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm text-center">
+        <div class="card-body">
+          <h3 class="mb-0 text-warning"><%= stats.pendingBookings %></h3>
+          <small class="text-muted">Pending Bookings</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm text-center">
+        <div class="card-body">
+          <h3 class="mb-0 text-info"><%= stats.totalUsers %></h3>
+          <small class="text-muted">Users</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs mb-3" id="adminTabs">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-cars">Cars</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-bookings">Bookings</button></li>
+  </ul>
+
+  <div class="tab-content">
+    <!-- CARS TAB -->
+    <div class="tab-pane fade show active" id="tab-cars">
+      <div class="d-flex justify-content-between mb-2">
+        <h5 class="mb-0">Manage Cars</h5>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addCarModal">
+          <i class="bi bi-plus-circle"></i> Add Car
+        </button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-sm bg-white align-middle">
+          <thead>
+            <tr>
+              <th>Image</th><th>Name</th><th>Model</th><th>Year</th>
+              <th>Price/day</th><th>Available</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% cars.forEach(c => { %>
+              <tr>
+                <td><img src="<%= c.image %>" alt="" style="width:60px;height:40px;object-fit:cover;" class="rounded"></td>
+                <td><%= c.name %></td>
+                <td><%= c.model %></td>
+                <td><%= c.year %></td>
+                <td>$<%= Number(c.price_per_day).toFixed(2) %></td>
+                <td>
+                  <% if (c.available) { %>
+                    <span class="badge bg-success">Yes</span>
+                  <% } else { %>
+                    <span class="badge bg-danger">No</span>
+                  <% } %>
+                </td>
+                <td class="text-nowrap">
+                  <button class="btn btn-sm btn-outline-primary"
+                          data-bs-toggle="modal" data-bs-target="#editCar<%= c.id %>">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <form action="/admin/cars/<%= c.id %>/delete" method="POST" class="d-inline"
+                        onsubmit="return confirm('Delete this car?');">
+                    <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                  </form>
+                </td>
+              </tr>
+
+              <!-- Edit Modal -->
+              <div class="modal fade" id="editCar<%= c.id %>" tabindex="-1">
+                <div class="modal-dialog">
+                  <form action="/admin/cars/<%= c.id %>/update" method="POST" class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Edit <%= c.name %></h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                      <div class="row g-2">
+                        <div class="col-6"><label class="form-label small">Name</label>
+                          <input name="name" class="form-control" value="<%= c.name %>" required></div>
+                        <div class="col-6"><label class="form-label small">Model</label>
+                          <input name="model" class="form-control" value="<%= c.model || '' %>"></div>
+                        <div class="col-4"><label class="form-label small">Year</label>
+                          <input name="year" type="number" class="form-control" value="<%= c.year || '' %>"></div>
+                        <div class="col-4"><label class="form-label small">Price/day</label>
+                          <input name="price_per_day" type="number" step="0.01" class="form-control" value="<%= c.price_per_day %>" required></div>
+                        <div class="col-4"><label class="form-label small">Seats</label>
+                          <input name="seats" type="number" class="form-control" value="<%= c.seats %>"></div>
+                        <div class="col-6"><label class="form-label small">Transmission</label>
+                          <select name="transmission" class="form-select">
+                            <option <%= c.transmission === 'Automatic' ? 'selected' : '' %>>Automatic</option>
+                            <option <%= c.transmission === 'Manual' ? 'selected' : '' %>>Manual</option>
+                          </select></div>
+                        <div class="col-6"><label class="form-label small">Fuel</label>
+                          <select name="fuel" class="form-select">
+                            <option <%= c.fuel === 'Petrol' ? 'selected' : '' %>>Petrol</option>
+                            <option <%= c.fuel === 'Diesel' ? 'selected' : '' %>>Diesel</option>
+                            <option <%= c.fuel === 'Electric' ? 'selected' : '' %>>Electric</option>
+                            <option <%= c.fuel === 'Hybrid' ? 'selected' : '' %>>Hybrid</option>
+                          </select></div>
+                        <div class="col-12"><label class="form-label small">Image Path</label>
+                          <input name="image" class="form-control" value="<%= c.image %>"></div>
+                        <div class="col-12"><label class="form-label small">Description</label>
+                          <textarea name="description" class="form-control" rows="2"><%= c.description %></textarea></div>
+                        <div class="col-12 form-check ms-2">
+                          <input class="form-check-input" type="checkbox" name="available" id="avail<%= c.id %>" <%= c.available ? 'checked' : '' %>>
+                          <label class="form-check-label small" for="avail<%= c.id %>">Available</label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button class="btn btn-primary">Save Changes</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Add Car Modal -->
+      <div class="modal fade" id="addCarModal" tabindex="-1">
+        <div class="modal-dialog">
+          <form action="/admin/cars" method="POST" class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Add New Car</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <div class="row g-2">
+                <div class="col-6"><label class="form-label small">Name</label>
+                  <input name="name" class="form-control" required></div>
+                <div class="col-6"><label class="form-label small">Model</label>
+                  <input name="model" class="form-control"></div>
+                <div class="col-4"><label class="form-label small">Year</label>
+                  <input name="year" type="number" class="form-control"></div>
+                <div class="col-4"><label class="form-label small">Price/day</label>
+                  <input name="price_per_day" type="number" step="0.01" class="form-control" required></div>
+                <div class="col-4"><label class="form-label small">Seats</label>
+                  <input name="seats" type="number" class="form-control" value="5"></div>
+                <div class="col-6"><label class="form-label small">Transmission</label>
+                  <select name="transmission" class="form-select">
+                    <option>Automatic</option><option>Manual</option>
+                  </select></div>
+                <div class="col-6"><label class="form-label small">Fuel</label>
+                  <select name="fuel" class="form-select">
+                    <option>Petrol</option><option>Diesel</option><option>Electric</option><option>Hybrid</option>
+                  </select></div>
+                <div class="col-12"><label class="form-label small">Image Path (e.g. /images/civic.jpg)</label>
+                  <input name="image" class="form-control" placeholder="/images/civic.jpg"></div>
+                <div class="col-12"><label class="form-label small">Description</label>
+                  <textarea name="description" class="form-control" rows="2"></textarea></div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-primary">Add Car</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOOKINGS TAB -->
+    <div class="tab-pane fade" id="tab-bookings">
+      <h5 class="mb-2">Manage Bookings</h5>
+      <div class="table-responsive">
+        <table class="table table-sm bg-white align-middle">
+          <thead>
+            <tr>
+              <th>#</th><th>User</th><th>Car</th><th>Dates</th>
+              <th>Total</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (bookings.length === 0) { %>
+              <tr><td colspan="7" class="text-center text-muted">No bookings yet.</td></tr>
+            <% } %>
+            <% bookings.forEach(b => { %>
+              <tr>
+                <td>#<%= b.id %></td>
+                <td><%= b.user_name %><br><small class="text-muted"><%= b.user_email %></small></td>
+                <td><%= b.car_name %></td>
+                <td class="small">
+                  <%= new Date(b.start_date).toLocaleDateString() %><br>
+                  → <%= new Date(b.end_date).toLocaleDateString() %>
+                </td>
+                <td>$<%= Number(b.total_price).toFixed(2) %></td>
+                <td>
+                  <%
+                    const colors = {
+                      pending: 'warning text-dark',
+                      confirmed: 'success',
+                      rejected: 'danger',
+                      cancelled: 'secondary',
+                      completed: 'info text-dark'
+                    };
+                  %>
+                  <span class="badge bg-<%= colors[b.status] || 'secondary' %> text-capitalize"><%= b.status %></span>
+                </td>
+                <td>
+                  <form action="/admin/bookings/<%= b.id %>/status" method="POST" class="d-flex gap-1">
+                    <select name="status" class="form-select form-select-sm" style="width:auto;">
+                      <% ['pending','confirmed','rejected','completed','cancelled'].forEach(s => { %>
+                        <option value="<%= s %>" <%= b.status === s ? 'selected' : '' %>><%= s %></option>
+                      <% }) %>
+                    </select>
+                    <button class="btn btn-sm btn-primary">Update</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
